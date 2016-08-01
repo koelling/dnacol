@@ -22,7 +22,7 @@ def main(argv=None):
         sys.stderr.write('This script will read lines from STDIN, identify strings of DNA/RNA and write coloured output to STDOUT.\n\n')
 
         sys.stderr.write('Options:\n\t-w, --wide\tWide output (add spaces around each base)\n\n')
-        sys.stderr.write('Example:\n\tcat reads.fastq | python {}\n\n'.format(__file__))
+        sys.stderr.write('Example:\n\thead reads.fastq | python {}\n\n'.format(__file__))
 
         sys.stderr.write('Colour scheme: \033[30m')
         for base in ['A', 'T', 'C', 'G', 'U', 'N']:
@@ -72,7 +72,14 @@ def main(argv=None):
 
             #write the rest of the line
             sys.stdout.write(line[last_match_end:])
-    except IOError:
+    except:
+        #try to reset colour settings, even if we are interrupted
+        try:
+            sys.stdout.write('\033[0m')
+            sys.stdout.flush()
+        except:
+            pass
+
         return 1
 
     return 0
