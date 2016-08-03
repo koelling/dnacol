@@ -3,6 +3,7 @@
 
 import sys
 import re
+import argparse
 
 foreground_colour = 97
 base_colours = {
@@ -18,26 +19,40 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-    if ('-h' in argv or '--help' in argv):
-        #print help message and exit
-        sys.stderr.write('This script will read lines from STDIN, identify strings of DNA/RNA and write coloured output to STDOUT.\n\n')
+    #prepare description and epilog texts (shown for --help) 
+    help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and writes coloured output to STDOUT.'
 
-        sys.stderr.write('Options:\n\t-w, --wide\tWide output (add spaces around each base)\n\n')
-        sys.stderr.write('Example:\n\thead reads.fastq | python {}\n\n'.format(__file__))
+    help_epilog = ''    
+    help_epilog += 'examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(sys.argv[0], sys.argv[0])
+    help_epilog += 'colour scheme: \033[{}m'.format(foreground_colour)
+    for base in ['A', 'T', 'C', 'G', 'U', 'N']:
+        help_epilog += ' \033[{}m {} \033[0m'.format(base_colours[base], base)
 
-        sys.stderr.write('Colour scheme: \033[{}m'.format(foreground_colour))
-        for base in ['A', 'T', 'C', 'G', 'U', 'N']:
-            sys.stderr.write(' \033[{}m {} \033[0m'.format(base_colours[base], base))
-        sys.stderr.write('\n')
+    #parse command-line arguments
+    parser = argparse.ArgumentParser(description = help_description,
+        epilog = help_epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("-w", "--wide",
+        help="wide output (add spaces around each base)",
+        action='store_true')
+    parser.add_argument("file", nargs="?",
+        help="file name to read (default: read from STDIN)",
+        default='-')
+    args = parser.parse_args(argv[1:])
 
-        return 0
-
-    #wide format?
-    wide_format = ('-w' in argv or '--wide' in argv)
+    #open the file if we're not reading from stdin
+    if args.file and args.file != '-':
+        if args.file.endswith('.gz'):
+            import gzip
+            file_in = gzip.open(args.file, 'rb')
+        else:
+            file_in = open(args.file, 'r')
+    else:
+        file_in = sys.stdin
 
     #read input line by line (note: this will not work well when streaming long lines)
     try:
-        for line in sys.stdin:
+        for line in file_in:
             last_match_end = 0
             for match in re.finditer('\\b[ACGTUN]+\\b', line):
                 (match_start, match_end) = match.span()
@@ -60,7 +75,7 @@ def main(argv=None):
                         previous_base = base
 
                     #write base out
-                    if wide_format:
+                    if args.wide:
                         sys.stdout.write(' {} '.format(base))
                     else:
                         sys.stdout.write(base)
