@@ -21,12 +21,13 @@ def main(argv=None):
 
     #prepare description and epilog texts (shown for --help) 
     help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and writes coloured output to STDOUT.'
+    help_description += ' When a file name is provided, files ending in .gz will be decompressed on the fly.'
 
     help_epilog = ''    
     help_epilog += 'examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(sys.argv[0], sys.argv[0])
-    help_epilog += 'colour scheme: \033[{}m'.format(foreground_colour)
+    help_epilog += 'colour scheme: '
     for base in ['A', 'T', 'C', 'G', 'U', 'N']:
-        help_epilog += ' \033[{}m {} \033[0m'.format(base_colours[base], base)
+        help_epilog += ' \033[{}m\033[{}m {} \033[0m'.format(foreground_colour, base_colours[base], base)
 
     #parse command-line arguments
     parser = argparse.ArgumentParser(description = help_description,
