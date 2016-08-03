@@ -1,14 +1,15 @@
-# Colour Bases
-Colour DNA bases in terminal output
+# dnacol.py
+Color DNA/RNA bases in terminal output
 
 ## About
-This script will read lines from STDIN, identify strings of DNA/RNA and write coloured output to STDOUT.
+This is a script to display colored DNA or RNA sequences in the terminal. It will read lines from STDIN or a file name provided as an optional command line argument, look for any strings of `[ACGTUN]+` and color them.
 
 ## Options
     -w, --wide  Wide output (add spaces around each base)
 
-## Example
-    head phix.fa | python colour_bases.py
+## Examples
+    ./dnacol.py examples/phix.fa.gz | head
+    head examples/reads.txt | ./dnacol.py --wide
 
 ## Screenshot
 ![Screenshot](screenshot.png?raw=true)
