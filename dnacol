@@ -97,6 +97,11 @@ def main(argv=None):
         for line in file_in:
             last_match_end = 0
 
+            #detect VCF header line
+            if args.format == 'auto':
+                if line.startswith('#CHROM\tPOS\tID\tREF\tALT'):
+                    args.format = 'vcf'
+
             #only parse specific lines
             do_search = True
             if args.format == 'fastq':
@@ -116,6 +121,22 @@ def main(argv=None):
             if not do_search:
                 sys.stdout.write(line)
             else:
+                #detect SAM format
+                if args.format == 'auto':
+                    if re.search('^[!-?A-~]{1,254}'+
+                        '\t[0-9]+'+
+                        '\t.+'+
+                        '\t[0-9]+'+
+                        '\t[0-9]+'+
+                        '\t(\*|([0-9]+[MIDNSHPX=])+)'+
+                        '\t.+'+
+                        '\t[0-9]+'+
+                        '\t[0-9-]+'+
+                        '\t(\*|[A-Za-z=.]+)'
+                        '\t.+(\t|$)', line
+                    ):
+                        args.format = 'sam'
+
                 if args.format == 'sam':
                     #only color column #10 (SEQ)
                     matches = find_column_spans(line, [10])
@@ -124,7 +145,7 @@ def main(argv=None):
                     matches = find_column_spans(line, [4, 5])
                 elif args.format == 'fastq' or args.format == 'fasta':
                     #color the entire line, except the \n at the end
-                    matches = [ (0, len(line)-1) ]
+                    matches = [ (0, line.rfind('\n')) ]
                 else:
                     #search for strings of DNA/RNA in text
                     pattern = '\\b[ACGTUN]+\\b'
