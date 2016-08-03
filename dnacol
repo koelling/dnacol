@@ -70,6 +70,9 @@ def main(argv=None):
 
     #make sure we handle both upper and lowercase format names
     args.format = args.format.lower()
+    if not args.format in ['auto','text','sam','vcf','fastq','fasta']:
+        sys.stderr.write('Unexpected format: {} - setting to auto.\n'.format(args.format))
+        args.format = 'auto'
 
     #open the file if we're not reading from stdin
     if args.file and args.file != '-':
