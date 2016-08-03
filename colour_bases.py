@@ -4,13 +4,14 @@
 import sys
 import re
 
+foreground_colour = 97
 base_colours = {
-    'A': 106,
-    'C': 101,
-    'G': 102,
-    'T': 103,
+    'A': 44,
+    'C': 41,
+    'G': 42,
+    'T': 43,
     'U': 45,
-    'N': 47,
+    'N': 100,
 }
 
 def main(argv=None):
@@ -24,7 +25,7 @@ def main(argv=None):
         sys.stderr.write('Options:\n\t-w, --wide\tWide output (add spaces around each base)\n\n')
         sys.stderr.write('Example:\n\thead reads.fastq | python {}\n\n'.format(__file__))
 
-        sys.stderr.write('Colour scheme: \033[30m')
+        sys.stderr.write('Colour scheme: \033[{}m'.format(foreground_colour))
         for base in ['A', 'T', 'C', 'G', 'U', 'N']:
             sys.stderr.write(' \033[{}m {} \033[0m'.format(base_colours[base], base))
         sys.stderr.write('\n')
@@ -45,8 +46,8 @@ def main(argv=None):
                 if match_start > 0:
                     sys.stdout.write(line[last_match_end:match_start])
 
-                #make sure we have a black font
-                sys.stdout.write('\033[30m')
+                #make sure we have the correct foreground colour
+                sys.stdout.write('\033[{}m'.format(foreground_colour))
 
                 #loop through bases
                 previous_base = ''                
