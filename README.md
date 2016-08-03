@@ -8,8 +8,14 @@ This is a script to display colored DNA or RNA sequences in the terminal. It wil
     -w, --wide  Wide output (add spaces around each base)
 
 ## Examples
+    #read gzipped file
     ./dnacol.py examples/phix.fa.gz | head
+    
+    #pipe from stdin
     head examples/reads.txt | ./dnacol.py --wide
+    
+    #use `less -R` to display colors in less
+    ./dnacol.py examples/phix.fa.gz | less -R
 
 ## Screenshot
 ![Screenshot](screenshot.png?raw=true)
