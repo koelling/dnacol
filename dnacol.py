@@ -89,6 +89,9 @@ def main(argv=None):
 
             #write the rest of the line
             sys.stdout.write(line[last_match_end:])
+
+        #flush output
+        sys.stdout.flush()
     except:
         #try to reset color settings, even if we are interrupted
         try:
