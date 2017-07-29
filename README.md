@@ -24,7 +24,7 @@ By default, `dnacol` will color all strings of `[ACGTUN]+`. However, it will als
         file format (auto|text|sam|vcf|fastq|fasta)
 
 ## Download/Install
-Tested with Python 2.7 and Python 3.6. To install, simply clone this git repository and use the provided `setup.py` script. When installed correctly, `dnacol` will simply be available as `dnacol` in the command line.
+Tested with Python 2.7 and Python 3.6. To install, clone this git repository and use the provided `setup.py` script. When installed correctly, `dnacol` will simply be available as `dnacol` in the command line.
 
     #download
     git clone https://github.com/koelling/dnacol.git
