@@ -112,8 +112,9 @@ def main(argv=None):
         argv = sys.argv
 
     #prepare description and epilog texts (shown for --help) 
-    help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and writes colored output to STDOUT.'
+    help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and phred-encoded quality scores, and writes colored output to STDOUT.'
     help_description += ' When a file name is provided, files ending in .gz will be decompressed on the fly and the file format will be detected based on the extension.'
+    help_description += ' In addition, files in SAM or FASTQ format will also be detected based on their content.'
 
     help_epilog = ''    
     help_epilog += 'examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(sys.argv[0], sys.argv[0])
@@ -182,7 +183,7 @@ def main(argv=None):
                 if line.startswith('#CHROM\tPOS\tID\tREF\tALT'):
                     args.format = 'vcf'
 
-            #try to detect FASTQ format
+            #auto-detect FASTQ format
             if args.format == 'auto' and args.file == '-':                
                 if possible_fastq:
                     #first row should start with @ (read identifier)
@@ -247,21 +248,27 @@ def main(argv=None):
                 else:
                     sys.stdout.write(line)
             elif do_search:
-                #detect SAM format
+                #auto-detect SAM format
                 if args.format == 'auto' and args.file == '-':
-                    if re.search('^[!-?A-~]{1,254}'+
-                        '\t[0-9]+'+
-                        '\t.+'+
-                        '\t[0-9]+'+
-                        '\t[0-9]+'+
-                        '\t(\*|([0-9]+[MIDNSHPX=])+)'+
-                        '\t.+'+
-                        '\t[0-9]+'+
-                        '\t[0-9-]+'+
-                        '\t(\*|[A-Za-z=.]+)'
-                        '\t.+(\t|$)', line
-                    ):
-                        args.format = 'sam'
+                    if possible_sam:
+                        #skip headers
+                        if not line.startswith('@'):
+                            #try to see if this is in SAM format
+                            if re.search('^[!-?A-~]{1,254}'+
+                                '\t[0-9]+'+
+                                '\t.+'+
+                                '\t[0-9]+'+
+                                '\t[0-9]+'+
+                                '\t(\*|([0-9]+[MIDNSHPX=])+)'+
+                                '\t.+'+
+                                '\t[0-9]+'+
+                                '\t[0-9-]+'+
+                                '\t(\*|[A-Za-z=.]+)'
+                                '\t.+(\t|$)', line
+                            ):
+                                args.format = 'sam'
+                            else:
+                                possible_sam = False
 
                 if args.format == 'sam':
                     #only color column #10 (SEQ)
