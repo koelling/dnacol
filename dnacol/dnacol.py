@@ -173,6 +173,7 @@ def main(argv=None):
     try:
         line_counter = 0
         possible_fastq = True
+        possible_sam = True
         phred_quality_base = None
 
         for line in file_in:

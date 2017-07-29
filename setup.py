@@ -12,9 +12,9 @@ setup(
     # metadata for upload to PyPI
     author = "Nils Koelling",
     author_email = "git@nk.gl",
-    description = "Pipe output through this script to color DNA/RNA bases in the terminal",
+    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores in the terminal",
     license = "MIT",
-    keywords = "dnacol rnacol rna dna color colour bases console terminal stdout",
+    keywords = "dnacol rnacol rna dna quality phred color colour bases console terminal stdout",
     url = "https://github.com/koelling/dnacol/",
     download_url="https://github.com/koelling/dnacol/archive/%s.tar.gz" % version,
     platforms=["any"],
@@ -23,5 +23,8 @@ setup(
         'console_scripts': ['dnacol = dnacol.dnacol:main']
     },
 
-    # could also include long_description, download_url, classifiers, etc.
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+    ]
 )
