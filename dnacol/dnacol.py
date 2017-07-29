@@ -152,7 +152,7 @@ def main(argv=None):
     if args.file and args.file != '-':
         if args.file.endswith('.gz'):
             import gzip
-            file_in = gzip.open(args.file, 'rb')
+            file_in = gzip.open(args.file, 'rt')
             filename = args.file[:-3]
         else:
             file_in = open(args.file, 'r')
