@@ -1,0 +1,20 @@
+##prep 1kg
+#gzip -c -d examples/1kg/ALL.chr20.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz \
+#	| head -500 \
+#	| awk 'BEGIN { FS = OFS = "\t" } !/^##/ { print $1, $2, $3, $4, $5, $6, $7 }' \
+#	| gzip -c > examples/1kg/ALL.chr20.first_columns.vcf.gz
+
+#mv examples/1kg/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam examples/1kg/example.bam
+
+PS1='example$ '
+clear
+dnacol examples/phix.fa.gz | head -n6
+
+dnacol examples/1kg/SRR062634.filt.HEAD.fastq.gz | head -n8
+
+dnacol --wide examples/1kg/ALL.chr20.first_columns.vcf.gz | head -n4
+
+samtools view examples/1kg/example.bam | dnacol | head -n1
+
+
+#edit: remove empty 'example$' lines

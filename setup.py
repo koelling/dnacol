@@ -2,19 +2,31 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+
+#load version number (can't just import the package since we might miss requirements)
+execfile('dnacol/version.py')
+
 setup(
-    name = "dnacol",
-    version = "0.2.2",
+    name = __title__,
+    version = __version__,
     packages = find_packages(),
-    scripts = ['dnacol'],
 
     # metadata for upload to PyPI
-    author = "Nils Kölling",
+    author = "Nils Koelling",
     author_email = "git@nk.gl",
-    description = "Pipe output through this script to color DNA/RNA bases in the terminal",
+    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores in the terminal",
     license = "MIT",
-    keywords = "dnacol rnacol rna dna color",
+    keywords = "dnacol rnacol rna dna quality phred color colour bases console terminal stdout",
     url = "https://github.com/koelling/dnacol/",
+    download_url="https://github.com/koelling/dnacol/archive/%s.tar.gz" % __version__,
+    platforms=["any"],
 
-    # could also include long_description, download_url, classifiers, etc.
+    entry_points={
+        'console_scripts': ['dnacol = dnacol.dnacol:main']
+    },
+
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+    ]
 )
