@@ -305,7 +305,7 @@ def main(argv=None):
 
         #flush output
         sys.stdout.flush()
-    except (BrokenPipeError, IOError):
+    except (BrokenPipeError, IOError, KeyboardInterrupt):
         if args.debug:
             raise
         else:
