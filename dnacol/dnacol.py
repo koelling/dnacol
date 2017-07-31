@@ -6,6 +6,9 @@ import re
 import argparse
 import math
 
+#import version number
+from .version import __version__, __title__
+
 foreground_color = 97
 base_colors = {
     'A': 44,
@@ -140,6 +143,9 @@ def main(argv=None):
     parser.add_argument("-f", "--format",
         help="file format (auto|text|sam|vcf|fastq|fasta)",
         default='auto')
+    parser.add_argument("-v", "--version",
+        help="print version and exit",
+        action='store_true')
     parser.add_argument("--debug",
         help="debug mode (raise exceptions)",
         action='store_true')
@@ -147,6 +153,11 @@ def main(argv=None):
         help="file name to read (default: - = read from STDIN)",
         default='-')
     args = parser.parse_args(argv[1:])
+
+    #print version and exit
+    if args.version:
+        print('{} {}'.format(__title__, __version__))
+        return 0
 
     #make sure we handle both upper and lowercase format names
     args.format = args.format.lower()
