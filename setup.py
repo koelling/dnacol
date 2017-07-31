@@ -18,7 +18,7 @@ setup(
     license = "MIT",
     keywords = "dnacol rnacol rna dna quality phred color colour bases console terminal stdout",
     url = "https://github.com/koelling/dnacol/",
-    download_url="https://github.com/koelling/dnacol/archive/%s.tar.gz" % __version__,
+    download_url="https://github.com/koelling/dnacol/archive/v%s.tar.gz" % __version__,
     platforms=["any"],
 
     entry_points={
