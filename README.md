@@ -45,5 +45,5 @@ Tested with Python 2.7 and Python 3.6. To install, clone this git repository and
     #use `less -R` to display colors in less
     dnacol examples/phix.fa.gz | less -R
 
-## Screenshot
-![Screenshot](screenshot.png?raw=true)
+## Screenshots
+![Screenshots](screenshots_v0.3.png?raw=true)
