@@ -109,6 +109,12 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
+    #in python3 a broken pipe raises BrokenPipeError, but python2 doesn't have that yet
+    try:
+        broken_pipe_error_class = BrokenPipeError
+    except NameError:
+        broken_pipe_error_class = IOError #this will be repeated below, but that does not seem to cause any problems
+
     #prepare description and epilog texts (shown for --help) 
     help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and phred-encoded quality scores, and writes colored output to STDOUT.'
     help_description += ' When a file name is provided, files ending in .gz will be decompressed on the fly and the file format will be detected based on the extension.'
@@ -305,7 +311,7 @@ def main(argv=None):
 
         #flush output
         sys.stdout.flush()
-    except (BrokenPipeError, IOError, KeyboardInterrupt):
+    except (IOError, KeyboardInterrupt, broken_pipe_error_class):
         if args.debug:
             raise
         else:
