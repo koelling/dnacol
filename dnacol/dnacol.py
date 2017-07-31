@@ -305,7 +305,7 @@ def main(argv=None):
 
         #flush output
         sys.stdout.flush()
-    except:
+    except (BrokenPipeError, IOError):
         if args.debug:
             raise
         else:
@@ -316,8 +316,11 @@ def main(argv=None):
             except:
                 pass
 
+            #then return nonzero exit status
+            sys.stderr.close() #this prevents any additional broken pipe errors
             return 1
 
+    sys.stderr.close() #this prevents any additional broken pipe errors
     return 0
 
 if __name__ == "__main__":
