@@ -58,21 +58,23 @@ Options
 Download/Install
 ----------------
 
-Tested with Python 2.7 and Python 3.6. To install, clone this git
-repository and use the provided ``setup.py`` script. When installed
-correctly, ``dnacol`` will simply be available as ``dnacol`` in the
-command line.
+To install, use ``pip``::
+
+    pip install dnacol
+
+If the system-wide directory is not writable, you can install to your home directory with::
+
+    pip install dnacol --user
+
+Alternatively, you can clone this git
+repository and use the provided ``setup.py`` script.
 
 ::
 
-    #download
     git clone https://github.com/koelling/dnacol.git
+    cd dnacol && python setup.py install
 
-    #install
-    cd dnacol && python setup.py install    
-
-    #or: install to home directory (if system-wide directory is not writable)
-    cd dnacol && python setup.py install --user
+``dnacol`` has been tested with Python 2.7 and Python 3.6.
 
 Examples
 --------
@@ -91,4 +93,4 @@ Examples
 Screenshots
 -----------
 
-.. image:: screenshots_v0.3.png
+.. image:: https://raw.githubusercontent.com/koelling/dnacol/master/screenshots_v0.3.png
