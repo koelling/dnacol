@@ -124,7 +124,7 @@ def main(argv=None):
     help_description += ' Data in SAM or FASTQ format can also be detected when piped through STDIN.'
 
     help_epilog = ''    
-    help_epilog += 'examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(sys.argv[0], sys.argv[0])
+    help_epilog += 'examples:\n  head reads.fastq | dnacol\n  dnacol genome.fa\n\n'
     help_epilog += 'base color scheme:'
     for base in ['A', 'T', 'C', 'G', 'U', 'N']:
         help_epilog += ' \033[{}m\033[{}m {} \033[0m'.format(foreground_color, base_colors[base], base)
