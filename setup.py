@@ -4,7 +4,8 @@
 from setuptools import setup, find_packages
 
 #load version number (can't just import the package since we might miss requirements)
-execfile('dnacol/version.py')
+filename = 'dnacol/version.py'
+exec(compile(open(filename, "rb").read(), filename, 'exec')) #python2/3 compatible replacement for execfile()
 
 #load long description from readme
 with open('README.rst') as f:
