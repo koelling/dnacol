@@ -44,6 +44,24 @@ def find_column_spans(line, columns):
 
     return matches
 
+def detect_sam_header(line):
+    return re.search(r'^[!-?A-~]{1,254}'+
+        r'\s+[0-9]+'+
+        r'\s+.+'+
+        r'\s+[0-9]+'+
+        r'\s+[0-9]+'+
+        r'\s+(\*|([0-9]+[MIDNSHPX=])+)'+
+        r'\s+.+'+
+        r'\s+[0-9]+'+
+        r'\s+[0-9-]+'+
+        r'\s+(\*|[A-Za-z=.]+)'
+        r'\s+.+(\s+|$)', line
+    )
+
+def detect_vcf_header(line):
+    return re.search(r'^#CHROM\s+POS\s+ID\s+REF\s+ALT', line)
+
+#try to detect whether quality scores are phred+33 or +64 encoded (assumes 33 by default)
 def detect_quality_encoding(raw_quality_scores):
     #look for phred+33 encoding
     if min(raw_quality_scores) >= 33 and max(raw_quality_scores) <= 74:
@@ -54,6 +72,7 @@ def detect_quality_encoding(raw_quality_scores):
     else:
         return -1
 
+#helper function to set console color
 def set_color(color_code):
     sys.stdout.write('\033[{}m'.format(color_code))
 
@@ -196,52 +215,38 @@ def main(argv=None):
         phred_quality_base = None
 
         for line in file_in:
-            last_match_end = 0
-
-            #detect VCF header line
-            if args.format == 'auto' and args.file == '-':
-                if line.startswith('#CHROM\tPOS\tID\tREF\tALT'):
-                    args.format = 'vcf'
-
             #auto-detect format based on file contents
             if args.format == 'auto' and args.file == '-':
-                #auto-detect FASTQ format
-                if possible_fastq:
-                    #first row should start with @ (read identifier)
-                    if line_counter == 0 and not line.startswith('@'):
-                        possible_fastq = False
-                    #second row should be DNA
-                    elif line_counter == 1 and not re.search(r'^[A-Z]+$', line):
-                        possible_fastq = False
-                    #third row should start with plus
-                    elif line_counter == 2 and not line.startswith('+'):
-                        possible_fastq = False
-                    #fourth line is quality scores
-                    elif line_counter == 3:
-                        #at this point we can assume we have fastq
-                        args.format = 'fastq'
+                #auto-detect VCF format
+                if detect_vcf_header(line):
+                    args.format = 'vcf'
+                else:
+                    #auto-detect FASTQ format
+                    if possible_fastq:
+                        #first row should start with @ (read identifier)
+                        if line_counter == 0 and not line.startswith('@'):
+                            possible_fastq = False
+                        #second row should be DNA
+                        elif line_counter == 1 and not re.search(r'^[A-Z]+$', line):
+                            possible_fastq = False
+                        #third row should start with plus
+                        elif line_counter == 2 and not line.startswith('+'):
+                            possible_fastq = False
+                        #fourth line is quality scores
+                        elif line_counter == 3:
+                            #at this point we can assume we have fastq
+                            args.format = 'fastq'
 
-                #auto-detect SAM format
-                if possible_sam:
-                    #skip headers
-                    if not line.startswith('@'):
-                        #try to see if this is in SAM format
-                        if re.search('^[!-?A-~]{1,254}'+
-                            '\t[0-9]+'+
-                            '\t.+'+
-                            '\t[0-9]+'+
-                            '\t[0-9]+'+
-                            '\t(\*|([0-9]+[MIDNSHPX=])+)'+
-                            '\t.+'+
-                            '\t[0-9]+'+
-                            '\t[0-9-]+'+
-                            '\t(\*|[A-Za-z=.]+)'
-                            '\t.+(\t|$)', line
-                        ):
-                            args.format = 'sam'
-                        else:
-                            #make sure we don't try this for every line
-                            possible_sam = False
+                    #auto-detect SAM format
+                    if possible_sam:
+                        #skip headers
+                        if not line.startswith('@'):
+                            #try to see if this is in SAM format
+                            if detect_sam_header(line):
+                                args.format = 'sam'
+                            else:
+                                #make sure we don't try this for every line
+                                possible_sam = False
 
             #only parse specific lines
             do_search = True
@@ -284,6 +289,7 @@ def main(argv=None):
                     pattern = '\\b[ACGTUN]+\\b'
                     matches = [match.span(0) + ('dna',) for match in re.finditer(pattern, line)]
 
+                last_match_end = 0
                 for match_start, match_end, match_type in matches:
                     #write characters before this string
                     if match_start > 0:
