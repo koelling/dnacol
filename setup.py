@@ -19,16 +19,19 @@ setup(
     # metadata for upload to PyPI
     author = "Nils Koelling",
     author_email = "git@nk.gl",
-    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores in the terminal",
+    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores (`dnacol`) or colored amino acid codes (`pcol`) in the terminal",
     long_description = long_description,
     license = "MIT",
-    keywords = "dnacol rnacol rna dna quality phred color colour bases console terminal stdout",
+    keywords = "dnacol rnacol pcol rna dna protein amino acid quality phred color colour bases console terminal stdout",
     url = "https://github.com/koelling/dnacol/",
     download_url="https://github.com/koelling/dnacol/archive/v%s.tar.gz" % __version__,
     platforms=["any"],
 
     entry_points={
-        'console_scripts': ['dnacol = dnacol.dnacol:main']
+        'console_scripts': [
+            'dnacol = dnacol.dnacol:main_dna',
+            'pcol = dnacol.dnacol:main_protein'
+        ]
     },
 
     classifiers=[
