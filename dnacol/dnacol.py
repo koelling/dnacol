@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import re
+import collections
 import argparse
 import math
+import copy
 
 #import version number
 from .version import __version__, __title__
@@ -52,6 +55,21 @@ colormaps = {
 }
 quality_colors = [31, 33, 34, 36, 32]
 
+default_config = {
+    'dna_colormap': 'brgy'
+}
+
+#helper function to perform update of nested dictionary (config)
+#see: https://stackoverflow.com/a/3233356/466857
+def nested_dict_update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            r = nested_dict_update(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
 #find the spans of specific tab-separated columns in a given line
 def find_column_spans(line, columns):
     matches = []
@@ -78,20 +96,20 @@ def find_column_spans(line, columns):
 
 def detect_sam_header(line):
     return re.search(r'^[!-?A-~]{1,254}'+
-        r'\s+[0-9]+'+
-        r'\s+.+'+
-        r'\s+[0-9]+'+
-        r'\s+[0-9]+'+
-        r'\s+(\*|([0-9]+[MIDNSHPX=])+)'+
-        r'\s+.+'+
-        r'\s+[0-9]+'+
-        r'\s+[0-9-]+'+
-        r'\s+(\*|[A-Za-z=.]+)'
-        r'\s+.+(\s+|$)', line
+        r'\t[0-9]+'+
+        r'\t.+'+
+        r'\t[0-9]+'+
+        r'\t[0-9]+'+
+        r'\t(\*|([0-9]+[MIDNSHPX=])+)'+
+        r'\t.+'+
+        r'\t[0-9]+'+
+        r'\t[0-9-]+'+
+        r'\t(\*|[A-Za-z=.]+)'
+        r'\t.+(\t|$)', line
     )
 
 def detect_vcf_header(line):
-    return re.search(r'^#CHROM\s+POS\s+ID\s+REF\s+ALT', line)
+    return re.search(r'^#CHROM\tPOS\tID\tREF\tALT', line)
 
 #try to detect whether quality scores are phred+33 or +64 encoded (assumes 33 by default)
 def detect_quality_encoding(raw_quality_scores):
@@ -175,24 +193,50 @@ def main(argv=None, default_sequence_type = 'dna'):
     except NameError:
         broken_pipe_error_class = IOError #this will be repeated below, but that does not seem to cause any problems
 
+    #load config file
+    config = copy.deepcopy(default_config)
+    config_paths = ['/etc/dnacol', os.path.join(os.path.expanduser("~"), '.dnacol')]
+    for config_path in config_paths:
+        if os.path.isfile(config_path):
+            import yaml #only import yaml here so we don't waste time importing this if there is no file
+            try:
+                with open(config_path, 'r') as config_file:
+                    this_config = yaml.safe_load(config_file.read())
+                    config = nested_dict_update(config, this_config)
+            except (IOError, yaml.scanner.ScannerError) as e:
+                sys.stderr.write('Failed to load config file from {}: {}\n'.format(config_path, e))
+                pass
+
+    #check config
+    if not config['dna_colormap'] in ['brgy', 'gbyr']:
+        sys.stderr.write('Colormap for DNA must be one of brgy, gbyr. Ignoring setting!\n')
+        config['dna_colormap'] = default_config['dna_colormap']
+
+    #figure out our name, for example in help epilog
     executable_name = None
     if default_sequence_type == 'dna':
         executable_name = 'dnacol'
+        help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA, RNA or phred-encoded quality scores, and writes colored output to STDOUT.'
     elif default_sequence_type == 'protein':
         executable_name = 'pcol'
+        help_description = 'This script reads lines from STDIN or a file, identifies strings of amino acid one-letter codes, and writes colored output to STDOUT.'
 
-    #prepare description and epilog texts (shown for --help) 
-    help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA/RNA and phred-encoded quality scores, and writes colored output to STDOUT.'
+    #prepare description and epilog texts (shown for --help)
     help_description += ' When a file name is provided, files ending in .gz will be decompressed on the fly and the file format will be detected based on the extension.'
     help_description += ' Data in SAM or FASTQ format can also be detected when piped through STDIN.'
 
     help_epilog = ''
-    help_epilog += 'examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(executable_name, executable_name)
-    help_epilog += 'color maps:\n'
+    help_epilog += 'Examples:\n  head reads.fastq | {}\n  {} genome.fa\n\n'.format(executable_name, executable_name)
+    help_epilog += 'Configuration:\n'
+    help_epilog += '{} looks for YAML-formatted config files in the following locations: {}\n\n'.format(executable_name, ' '.join(config_paths))
+    help_epilog += 'Colormaps:\n'
     for colormap_name, colormap in colormaps.items():
         help_epilog += '{} =>'.format(colormap_name)
         for base, color in sorted(colormap.items(), key = lambda x: x[0]):
             help_epilog += ' \033[{}m\033[{}m {} \033[0m'.format(foreground_color, color, base)
+        if colormap_name.startswith('dna'):
+            if colormap_name == 'dna_{}'.format(config['dna_colormap']):
+                help_epilog += ' (default)'
         help_epilog += '\n'
     help_epilog += '\n'
     help_epilog += 'phred quality:'
@@ -209,9 +253,6 @@ def main(argv=None, default_sequence_type = 'dna'):
     parser.add_argument("-f", "--format",
         help="file format (auto|text|sam|vcf|fastq|fasta)",
         default='auto')
-    parser.add_argument("-c", "--colormap",
-        help="color map to use (dna|dna_brgy|dna_gbyr|protein, see below)",
-        default=default_sequence_type)
     parser.add_argument("-v", "--version",
         help="print version and exit",
         action='store_true')
@@ -234,17 +275,10 @@ def main(argv=None, default_sequence_type = 'dna'):
         sys.stderr.write('Unexpected format: {} - setting to auto.\n'.format(args.format))
         args.format = 'auto'
 
-    #make sure we handle both upper and lowercase color map names
-    args.colormap = args.colormap.lower()
-
-    #ignore invalid color map names
-    if not (args.colormap in colormaps or args.colormap == 'dna'):
-        sys.stderr.write('Unexpected sequence type: {} - setting to {}.\n'.format(args.colormap, default_sequence_type))
-        args.colormap = default_sequence_type
-
-    #handle default dna color map
-    if args.colormap == 'dna':
-        args.colormap = 'dna_brgy'
+    #figure out the colormap
+    colormap = default_sequence_type
+    if colormap == 'dna':
+        colormap = 'dna_{}'.format(config['dna_colormap'])
 
     #open the file if we're not reading from stdin
     if args.file and args.file != '-':
@@ -281,6 +315,8 @@ def main(argv=None, default_sequence_type = 'dna'):
             if args.format == 'auto' and args.file == '-':
                 #auto-detect VCF format
                 if detect_vcf_header(line):
+                    if args.debug:
+                        sys.stderr.write('Detected VCF header!\n')
                     args.format = 'vcf'
                 else:
                     #auto-detect FASTQ format
@@ -297,6 +333,8 @@ def main(argv=None, default_sequence_type = 'dna'):
                         #fourth line is quality scores
                         elif line_counter == 3:
                             #at this point we can assume we have fastq
+                            if args.debug:
+                                sys.stderr.write('Detected four FASTQ lines!\n')
                             args.format = 'fastq'
 
                     #auto-detect SAM format
@@ -305,6 +343,8 @@ def main(argv=None, default_sequence_type = 'dna'):
                         if not line.startswith('@'):
                             #try to see if this is in SAM format
                             if detect_sam_header(line):
+                                if args.debug:
+                                    sys.stderr.write('Detected SAM header!\n')
                                 args.format = 'sam'
                             else:
                                 #make sure we don't try this for every line
@@ -333,12 +373,12 @@ def main(argv=None, default_sequence_type = 'dna'):
                 #figure out which parts of the line to color
                 if args.format == 'sam':
                     #only color column #10 (SEQ)
-                    matches = find_column_spans(line, {10: args.colormap, 11: 'quality'})
+                    matches = find_column_spans(line, {10: colormap, 11: 'quality'})
                 elif args.format == 'vcf':
                     #only color columns #4+5 (REF+ALT)
-                    matches = find_column_spans(line, {4: args.colormap, 5: args.colormap})
+                    matches = find_column_spans(line, {4: colormap, 5: colormap})
                 elif args.format == 'fastq' or args.format == 'fasta':
-                    match_type = args.colormap
+                    match_type = colormap
                     if args.format == 'fastq':
                         if line_counter % 4 == 3:
                             match_type = 'quality'
@@ -348,8 +388,8 @@ def main(argv=None, default_sequence_type = 'dna'):
                     matches = [ (0, line_end if line_end > 0 else len(line), match_type) ]
                 else:
                     #search for strings of expected letters (based on colormap) in text
-                    pattern = r'\b[%s]+\b' % (''.join(colormaps[args.colormap].keys())) #FIXME: test this!
-                    matches = [match.span(0) + (args.colormap,) for match in re.finditer(pattern, line)]
+                    pattern = r'\b[%s]+\b' % (''.join(colormaps[colormap].keys()))
+                    matches = [match.span(0) + (colormap,) for match in re.finditer(pattern, line)]
 
                 last_match_end = 0
                 for match_start, match_end, match_type in matches:
