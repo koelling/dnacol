@@ -6,16 +6,16 @@
 
 #mv examples/1kg/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam examples/1kg/example.bam
 
+#edit: remove empty 'example$' lines
+
 PS1='example$ '
 clear
 dnacol examples/phix.fa.gz | head -n6
+
+pcol examples/insulin.fa
 
 dnacol examples/1kg/SRR062634.filt.HEAD.fastq.gz | head -n8
 
 zcat examples/1kg/ALL.chr20.first_columns.vcf.gz | column -t | dnacol | head -n4
 
 samtools view examples/1kg/example.bam | dnacol | head -n1
-
-pcol examples/insulin.fa
-
-#edit: remove empty 'example$' lines

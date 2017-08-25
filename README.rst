@@ -116,4 +116,4 @@ Examples
 Screenshots
 -----------
 
-.. image:: https://raw.githubusercontent.com/koelling/dnacol/master/screenshots_v0.3.png
+.. image:: https://raw.githubusercontent.com/koelling/dnacol/master/screenshots_v0.4.png
