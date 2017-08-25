@@ -19,7 +19,7 @@ setup(
     # metadata for upload to PyPI
     author = "Nils Koelling",
     author_email = "git@nk.gl",
-    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores (`dnacol`) or colored amino acid codes (`pcol`) in the terminal",
+    description = "Display FASTA/FASTQ/SAM/VCF files with colored DNA/RNA bases and quality scores (`dnacol`) or a protein sequence with colored amino acid codes (`pcol`) in the terminal",
     long_description = long_description,
     license = "MIT",
     keywords = "dnacol rnacol pcol rna dna protein amino acid quality phred color colour bases console terminal stdout",
@@ -39,7 +39,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: MacOS',
         'Operating System :: Unix',
-        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-    ]
+    ],
+
+    install_requires=[
+        'pyyaml',
+    ],
 )
