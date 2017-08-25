@@ -214,12 +214,12 @@ def main(argv=None, default_sequence_type = 'dna'):
 
     #figure out our name, for example in help epilog
     executable_name = None
-    if default_sequence_type == 'dna':
-        executable_name = 'dnacol'
-        help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA, RNA or phred-encoded quality scores, and writes colored output to STDOUT.'
-    elif default_sequence_type == 'protein':
+    if default_sequence_type == 'protein':
         executable_name = 'pcol'
         help_description = 'This script reads lines from STDIN or a file, identifies strings of amino acid one-letter codes, and writes colored output to STDOUT.'
+    else:
+        executable_name = 'dnacol'
+        help_description = 'This script reads lines from STDIN or a file, identifies strings of DNA, RNA or phred-encoded quality scores, and writes colored output to STDOUT.'
 
     #prepare description and epilog texts (shown for --help)
     help_description += ' When a file name is provided, files ending in .gz will be decompressed on the fly and the file format will be detected based on the extension.'
