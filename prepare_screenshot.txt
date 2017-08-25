@@ -16,5 +16,6 @@ zcat examples/1kg/ALL.chr20.first_columns.vcf.gz | column -t | dnacol | head -n4
 
 samtools view examples/1kg/example.bam | dnacol | head -n1
 
+pcol examples/insulin.fa
 
 #edit: remove empty 'example$' lines
