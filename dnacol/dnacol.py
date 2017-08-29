@@ -230,7 +230,7 @@ def main(argv=None, default_sequence_type = 'dna'):
     help_epilog += 'Configuration:\n'
     help_epilog += '{} looks for YAML-formatted config files in the following locations: {}\n\n'.format(executable_name, ' '.join(config_paths))
     help_epilog += 'Colormaps:\n'
-    for colormap_name, colormap in colormaps.items():
+    for colormap_name, colormap in sorted(colormaps.items()):
         help_epilog += '{} =>'.format(colormap_name)
         for base, color in sorted(colormap.items(), key = lambda x: x[0]):
             help_epilog += ' \033[{}m\033[{}m {} \033[0m'.format(foreground_color, color, base)
