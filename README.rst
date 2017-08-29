@@ -12,10 +12,16 @@ DNA/RNA it can find. In addition, it can also color phred-encoded
 quality scores in FASTQ/SAM files.
 If called using ``pcol``, it will instead color protein sequences encoded as amino acid one-letter codes.
 
+Screenshots
+~~~~~~~~~~~
+
+.. image:: https://raw.githubusercontent.com/koelling/dnacol/master/screenshots_v0.4.png
+
 Format-specific coloring
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, ``dnacol`` will color all strings of DNA/RNA and ``pcol`` will color all strings of the twenty standard amino acid letters.
+By default, ``dnacol`` will find and color all strings of one or more DNA/RNA letters and
+``pcol`` will color all strings of the twenty standard amino acid letters.
 However, they will also recognize a few standard file formats and apply more
 targeting coloring. When reading a file, these formats will
 automatically be recognized based on their file extensions. When reading
@@ -66,7 +72,7 @@ Options
 Configuration
 -------------
 You can create a configuration file in YAML format called ``/etc/dnacol`` or ``~/.dnacol`` to change the behavior of this script.
-At the moment, the only setting available is the default colormap to use for DNA sequences.
+At the moment, the only setting available is the colormap to use for DNA sequences.
 See see ``dnacol --help`` for examples of the colormaps that are available.
 
 To use the ``gbyr`` instead of the ``brgy`` colormap, set the ``dna_colormap`` option like this:
@@ -94,7 +100,7 @@ repository and use the provided ``setup.py`` script.
     git clone https://github.com/koelling/dnacol.git
     cd dnacol && python setup.py install
 
-``dnacol`` has been tested with Python 2.7 and Python 3.6.
+``dnacol`` has been tested with Python 2.7 and Python 3.5 and 3.6.
 
 Examples
 --------
@@ -112,8 +118,3 @@ Examples
 
     #use `less -R` to display colors in less
     dnacol examples/phix.fa.gz | less -R
-
-Screenshots
------------
-
-.. image:: https://raw.githubusercontent.com/koelling/dnacol/master/screenshots_v0.4.png
